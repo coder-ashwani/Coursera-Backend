@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 # Coursera-Backend
-=======
 Create a course selling app
 Initialize a new Node.js project
 Add Express, jsonwebtoken, mongoose to it as a dependency
@@ -18,4 +16,3 @@ Use cookies instead of JWT for auth
 Add a rate limiting middleware
 Frontend in ejs (low pri)
 Frontend in React
->>>>>>> 3b828e9 (added user signup endpoint)
