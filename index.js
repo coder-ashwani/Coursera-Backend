@@ -5,6 +5,8 @@ const userrouter = require('./routes/user')
 const courserouter = require('./routes/course')
 const adminrouter = require('./routes/admin')
 const mongoose = require('mongoose');
+const { auth } = require('./middlewares/user');
+require("dotenv").config();
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));   //

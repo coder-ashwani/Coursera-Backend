@@ -1,12 +1,12 @@
 
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } =  "hellobacho";
+// const { JWT_SECRET } =  require("../env");
 
 function auth(req,res,next){
     const token = req.headers.token;
-    const decodeddata= jwt.verify(token,JWT_SECRET);
+    const decodeddata= jwt.verify(token,process.env.JWT_SECRET);
     if(decodeddata){
-        req.userId = decodeddata.id;
+        req.email  = decodeddata.email;
         next();
     }
     else{
@@ -16,4 +16,4 @@ function auth(req,res,next){
     }
 }
 
-module.exports = {JWT_SECRET}
+module.exports = {auth}
