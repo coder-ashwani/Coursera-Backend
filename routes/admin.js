@@ -2,10 +2,13 @@ const express=  require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const {JWT_Admin_SECRET}  = require('../config');
+const {adminmiddleware} = require('../middlewares/admin');
 // require("dotenv").config();
 
 
 const { adminModel, userModel, courseModel } = require('../Db');
+
 
 router.post('/signup', async (req, res) => {
     const email = req.body.email;
@@ -39,7 +42,7 @@ router.post('/signin',async (req, res) => {
         const email = req.body.email;
         const password = req.body.password;
         const admin =  await adminModel.findOne({email: email});
-        console.log(admin);
+        // console.log(admin);
 
         try{
             if(!admin){
@@ -50,7 +53,11 @@ router.post('/signin',async (req, res) => {
         }
         const passwordMatch = await bcrypt.compare(password, admin.password);
         if(passwordMatch){
-            const token = jwt.sign({email:email},"hellobacho");
+        const token = jwt.sign({id : admin._id},JWT_Admin_SECRET);
+                 
+        // do cookie based logic here
+
+
             res.send({
                 message: 'Admin Logged in Successfully',
                 token: token
@@ -74,8 +81,22 @@ router.post('/signin',async (req, res) => {
 
 
 
- router.post('/addcourse', (req, res) => {
-    res.send('Course Added')
+ router.post('/addcourse',adminmiddleware, async(req, res) => {
+   const adminId  = req.userId;
+   const {title , description, price, imageurl} = req.body;
+
+    const course = await courseModel.create({
+       title: title,
+       description: description,
+       price: price,
+       imageurl: imageurl,
+       createrId: adminId
+   })
+
+   res.send({
+       message: 'Course Created',
+       course_Id  : course._id
+   })
 })
 router.put('/updatecourse', (req, res) => {
     res.send('Course Updated')

@@ -1,7 +1,9 @@
 const express = require('express');
-const { userModel } = require('../Db');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const { userModel } = require('../Db');
+const jwt = require('jsonwebtoken');
+const { JWT_USER_SECRET } = require('../config');
 
 router.post('/signup', async(req, res) => {
     const email = req.body.email;
@@ -34,9 +36,43 @@ router.post('/signup', async(req, res) => {
         })
     }
 })
-router.get('/login', (req, res) => {
-    res.send('User Page')
+
+// Signin endpoint returns a token
+router.post('/signin', async(req, res) => {
+    const email =req.body.email;
+    const password = req.body.password; 
+    const user  = await userModel.findOne({email: email});
+
+    try {
+        if(!user){
+            res.status(403).send({
+                message: 'User does not exist'
+            })
+            return;
+        }
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        const token = jwt.sign({id : user._id}, JWT_USER_SECRET);// secret key
+        if(passwordMatch){
+            res.send({
+                message: 'User Logged in Successfully',
+                token: token
+            })
+        }
+        else{
+            res.status(403).send({
+                message: 'Incorrect Password'
+            })
+        }
+    }
+    catch(e){
+        console.log(e);
+        res.status(500).send({
+            message: 'Something went wrong'
+        })
+    }
 })
+
+
 router.get('/purchasecourse', (req, res) => {
     res.send('Courses purchased by user')
 })
