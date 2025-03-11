@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { userModel } = require('../Db');
+const { userModel,courseModel,purchaseModel } = require('../Db');
 const jwt = require('jsonwebtoken');
 const { JWT_USER_SECRET } = require('../config');
+const {usermiddleware} = require('../middlewares/user');
 
 router.post('/signup', async(req, res) => {
     const email = req.body.email;
@@ -38,7 +39,7 @@ router.post('/signup', async(req, res) => {
 })
 
 // Signin endpoint returns a token
-router.post('/signin', async(req, res) => {
+router.post('/signin',async(req, res) => {
     const email =req.body.email;
     const password = req.body.password; 
     const user  = await userModel.findOne({email: email});
@@ -73,15 +74,30 @@ router.post('/signin', async(req, res) => {
 })
 
 
-router.get('/purchasecourse', (req, res) => {
-    res.send('Courses purchased by user')
+router.get('/purchases',usermiddleware,  async (req, res) => {
+    const userId = req.userId;
+    const purchases = await purchaseModel.find({
+        userId: userId
+    });
+    let purchasedcoureseID =[] ;
+    for(let i=0;i<purchases.length;i++){
+        purchasedcoureseID.push(purchases[i].courseId);
+    }
+    const  coursedata  = await courseModel.find({
+        _id: {
+            $in: purchasedcoureseID
+        }
+    });
+
+    res.json({
+        purchases,
+        coursedata
+    });
+
+
 })
-router.get('/courses', (req, res) => {
-    res.send('All Courses')
-})
-router.get('/purchased', (req, res) => {
-    res.send('Purchased Courses')
-})
+
+
 
 
 
