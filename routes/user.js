@@ -77,8 +77,9 @@ router.post('/signin',async(req, res) => {
 router.get('/purchases',usermiddleware,  async (req, res) => {
     const userId = req.userId;
     const purchases = await purchaseModel.find({
-        userId: userId
+        userId
     });
+    
     let purchasedcoureseID =[] ;
     for(let i=0;i<purchases.length;i++){
         purchasedcoureseID.push(purchases[i].courseId);
