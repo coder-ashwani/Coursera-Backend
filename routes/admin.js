@@ -79,12 +79,10 @@ router.post('/signin',async (req, res) => {
 })  
 
 
-
-
  router.post('/addcourse',adminmiddleware, async(req, res) => {
    const adminId  = req.userId;
    const {title , description, price, imageurl} = req.body;
-
+  
     const course = await courseModel.create({
        title: title,
        description: description,
@@ -98,14 +96,41 @@ router.post('/signin',async (req, res) => {
        course_Id  : course._id
    })
 })
-router.put('/updatecourse', (req, res) => {
-    res.send('Course Updated')
+router.put('/updatecourse',adminmiddleware, async (req, res) => {
+    const adminId  = req.userId;
+    const {title , description, price, imageurl, course_Id} = req.body;
+
+    const course = await courseModel.updateOne({
+        _id : course_Id,
+        createrId: adminId /// imp to check if the course is created by the same admin or not
+    },{
+       title: title,
+       description: description,
+       price: price,
+       imageurl: imageurl
+   })
+   if (!course) {
+    return res.status(404).send({
+        message: 'Course not found or not authorized to update'
+    });
+    }
+
+   res.send({
+       message: 'Course Updated',
+       course_Id  : course._id ///bug this line is working
+   })
 })
-router.delete('/deletecourse', (req, res) => {
-    res.send('Course Deleted')
-})
-router.get('/allcourses', (req, res) => {
-    res.send('All Courses') 
+
+router.get('/allcourses',adminmiddleware, async (req, res) => {
+    const adminId  = req.userId;
+    const courses = await courseModel.find({
+        createrId: adminId
+    })
+
+    res.json({
+        message : "all courses by ",
+        courses
+    });
 })
 
  module.exports = router;
